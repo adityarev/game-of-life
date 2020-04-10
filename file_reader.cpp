@@ -17,7 +17,10 @@ FileReader::open(std::string path) {
 		puts("failed! Path changed to default");
 		f = fopen((constant::DEFAULT_PATH).c_str(), "r");
 	} else {
-		puts("done");
+		if (!f)
+			puts("failed to read default pattern");
+		else
+			puts("done");
 	}
 }
 
@@ -28,7 +31,7 @@ FileReader::read() {
 	
 	std::vector<std::string> lines;
 	
-	while (!fgets(str, len, f)) {
+	while (fgets(str, len, f)) {
 		std::string line(str);
 		lines.push_back(line);
 	}
@@ -74,7 +77,7 @@ FileReader::get_normalized_lines() {
 	};
 	
 	int max_len = get_max_len();
-	std::vector<std::string> normalized_lines;
+	std::vector<std::string> normalized_lines = this->lines;
 	
 	for (std::string& line: normalized_lines) {
 		while ((int)line.length() < max_len)

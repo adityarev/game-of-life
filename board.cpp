@@ -7,10 +7,10 @@
 
 #include "board.h"
 #include "constant.h"
-#include "file_reader.h"
+#include "file_reader.cpp"
 
-const int ROW = constant::HEIGHT + 1;
-const int COL = constant::WIDTH + 1;
+const int ROW = constant::HEIGHT + 3;
+const int COL = constant::WIDTH + 3;
 
 // --- Private Methods ---
 std::vector<std::vector<bool>>
@@ -28,8 +28,8 @@ Board::reset() {
 	
 	board = get_initial_board();
 	
-	for (int i = 0; i < ROW; i++)
-		for (int j = 0; j < COL; j++)
+	for (int i = 0; i < (int)lines.size(); i++)
+		for (int j = 0; j < (int)lines[i].size(); j++)
 			board[i][j] = (lines[i][j] == constant::SELECTED_C);
 }
 
@@ -92,8 +92,8 @@ Board::update() {
 					continue;
 				
 				if (
-					is_in_range(x, 0, constant::HEIGHT)
-					&& is_in_range(x, 0, constant::WIDTH)
+					is_in_range(x, 0, ROW - 1)
+					&& is_in_range(y, 0, COL - 1)
 					&& board[x][y]
 				) {
 					counter++;

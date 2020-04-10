@@ -3,6 +3,7 @@
 
 class Test {
 public:
+	Test();
 	template<typename T> void printnumb(T);
 	void printstr(std::string);
 };
