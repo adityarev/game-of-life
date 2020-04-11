@@ -9,12 +9,12 @@
 #include "constant.h"
 #include "file_reader.cpp"
 
-const int ROW = constant::HEIGHT + 3;
-const int COL = constant::WIDTH + 3;
+const int ROW = constant::HEIGHT + constant::MARGIN;
+const int COL = constant::WIDTH + constant::MARGIN;
 
 // --- Private Methods ---
 std::vector<std::vector<bool>>
-Board::get_initial_board() {
+Board::get_initial_state() {
 	return std::vector<std::vector<bool>>(
 		ROW,
 		std::vector<bool>(COL, false)
@@ -26,11 +26,11 @@ Board::reset() {
 	FileReader fr(path);
 	std::vector<std::string> lines = fr.get_normalized_lines();
 	
-	board = get_initial_board();
+	state = get_initial_state();
 	
 	for (int i = 0; i < (int)lines.size(); i++)
 		for (int j = 0; j < (int)lines[i].size(); j++)
-			board[i][j] = (lines[i][j] == constant::SELECTED_C);
+			state[i][j] = (lines[i][j] == constant::SELECTED_C);
 }
 
 
@@ -59,8 +59,8 @@ Board::next(int n) {
 }
 
 std::vector<std::vector<bool>>
-Board::get_board() {
-	return this->board;
+Board::get_state() {
+	return this->state;
 }
 
 void
@@ -83,6 +83,15 @@ Board::update() {
 	count_degree = [&](int i, int j) -> int {
 		int counter = 0;
 		
+		std::function<bool(int,int)>
+		is_active = [&](int x, int y) -> bool {
+			return (
+				is_in_range(x, 0, ROW - 1)
+				&& is_in_range(y, 0, COL - 1)
+				&& state[x][y]
+			);
+		};
+		
 		for (int& xx: xxs) {
 			for (int& yy: yys) {
 				int x = i + xx;
@@ -90,34 +99,28 @@ Board::update() {
 				
 				if (x == i && y == j)
 					continue;
-				
-				if (
-					is_in_range(x, 0, ROW - 1)
-					&& is_in_range(y, 0, COL - 1)
-					&& board[x][y]
-				) {
+				if (is_active(x, y))
 					counter++;
-				}
 			}
 		}
 		
 		return counter;
 	};
 	
-	std::vector<std::vector<bool>> updated_board = get_initial_board();
+	std::vector<std::vector<bool>> updated_state = get_initial_state();
 	
 	for (int i = 0; i < ROW; i++)
 		for (int j = 0; j < COL; j++) {
-			bool active = board[i][j];
+			bool active = state[i][j];
 			int degree = count_degree(i, j);
 			
 			if (active && is_in_range(degree, 2, 3))
-				updated_board[i][j] = true;
+				updated_state[i][j] = true;
 			if (!active && degree == 3)
-				updated_board[i][j] = true;
+				updated_state[i][j] = true;
 		}
 	
-	// Update board
-	this->board = updated_board;
+	// Update state
+	this->state = updated_state;
 }
 
